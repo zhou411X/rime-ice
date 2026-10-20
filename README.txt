@@ -7,9 +7,13 @@ Rime Ice / 雾凇输入法设置 0.2.0
 安装
 ----
 联网安装应用包：sudo apt install ./rime-ice_0.2.0_all.deb
-完全离线安装：解压完整 offline.tar.gz，进入 bundle，执行 sudo ./install-offline.sh。
-单独的应用 deb 不包含 Ubuntu 系统依赖；无网电脑必须使用完整离线包。
-安装器先展示软件包变更。首次打开“雾凇输入法设置”，在“常用设置”选择启用，
+应用 deb 包含设置中心、公开雾凇拼音方案、词典和主题，不包含系统依赖。
+APT 会从 Ubuntu 软件源安装缺少的 Fcitx5、Rime、GTK 和字体等依赖；需要联网。
+若用 dpkg 安装后提示缺少依赖，可联网运行 sudo apt --fix-broken install，检查安装计划后确认。
+从 0.1.0 升级建议同时下载过渡包，执行：
+sudo apt install ./rime-ice_0.2.0_all.deb ./rime-ice-settings_0.2.0_all.deb
+安装完成后输入、词典、主题和个人配置均可离线使用。
+APT 会展示软件包变更。首次打开“雾凇拼音”，在“常用设置”选择启用，
 按提示在 Fcitx5 配置工具中添加 Rime，然后注销并重新登录。
 
 功能
@@ -42,7 +46,8 @@ TXT 仅保存词条、编码、权重。固定第二位规则随个人配置 JSO
 源码与验证
 ----------
 设置中心：rime_ice/app.py；配置逻辑：rime_ice/model.py。
-构建：./build_deb.sh；离线依赖收集：./build_offline.sh。
+构建应用：./build_deb.sh；生成对应应用源码：./build_source.sh。
+这两个命令不收集或打包 Ubuntu 依赖；可选离线工具仅供自行构建，不随本版发布。
 配置测试：/usr/bin/python3 -m unittest discover -s tests -v
 界面测试：PYTHONPATH=. GTK_A11Y=none ADW_DISABLE_PORTAL=1 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a dbus-run-session --config-file=tests/session.conf -- /usr/bin/python3 tests/check_gui.py
 测试只使用临时用户目录；不会改写当前用户输入法配置。
@@ -55,9 +60,9 @@ TXT 仅保存词条、编码、权重。固定第二位规则随个人配置 JSO
 开发目录的 upstream/ 保存完整上游源码；分发源码包包含本发行所用的公开词典和 Lua 源码。
 许可证和所选文件的原始版权声明均保留。
 发行包不包含本机自定义短语、学习数据库、sync 目录或 installation.yaml。
-Fcitx5/Rime/Ubuntu 依赖保持各自许可；随包 deb 保留 /usr/share/doc 下版权说明。
-向他人分发完整离线包时，请同时提供对应源码及上游版权说明。
+Fcitx5/Rime/Ubuntu 依赖由系统软件源提供，保持各自许可，不包含在应用 deb 中。
+分享本应用时请一并提供应用源码和上游版权说明。
 
-0.2.0 更名说明：主包与启动命令为 rime-ice；旧命令仍兼容。离线包包含旧包的空过渡包。
+0.2.0 更名说明：主包与启动命令为 rime-ice；旧命令仍兼容。发布页另外提供旧包的空过渡包。
 新增主题参考 nevertoday/rime-color-scheme，固定版本见 THEME_UPSTREAM.json。
 配色适配保留 MIT 许可，见 LICENSES/rime-color-scheme.txt；名称不表示品牌合作。

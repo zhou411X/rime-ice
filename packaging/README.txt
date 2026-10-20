@@ -1,37 +1,33 @@
 Packaging Rime Ice
 
-On an Ubuntu 24.04 amd64 build computer, after the application sources and
-data/rime snapshot are ready:
+For the standard Debian release, after the public application sources and
+data/rime snapshot are ready, run:
 
     ./build_deb.sh
+    ./build_source.sh
+
+These commands produce dist/rime-ice_0.2.0_all.deb, the empty
+dist/rime-ice-settings_0.2.0_all.deb upgrade transition, and
+dist/rime-ice_0.2.0_source.tar.gz. The .deb declares its Ubuntu dependencies;
+users install those with APT. No Ubuntu binary packages are bundled.
+
+The source archive contains public application code, reviewed Rime data,
+themes and licenses, packaging scripts, tests, README.md, and the reviewed
+settings screenshot. The data copy uses an explicit file type allowlist and
+excludes user caches and private working files.
+
+The offline dependency bundle is an optional, separately built artifact for
+Ubuntu 24.04 amd64. It is not part of the standard release. To build it:
+
     ./build_offline.sh
     ./build_sources.sh
 
-To reuse the verified 0.1.0 dependency bundle during the rename, run:
+To reuse the verified 0.1.0 dependency bundle during an optional offline build:
 
     ./build_offline.sh --from-bundle dist/rime-ice-settings_0.1.0_ubuntu24.04_amd64_offline.tar.gz
 
 After an application-only edit with unchanged Depends, rebuild both .debs and
-use `./build_offline.sh --reuse-bundle` to refresh the 0.2.0 runtime archive.
-
-The first command creates dist/rime-ice_0.2.0_all.deb and the empty
-dist/rime-ice-settings_0.2.0_all.deb transitional package. The second
-uses authenticated Ubuntu noble, noble-updates, and noble-security APT indexes
-to download the transitive binary dependency closure into an archive. It uses
-an empty dpkg status and isolated APT lists/cache, so the bundle does not
-depend on packages already installed on the build computer. It does not install
-packages or alter the computer's APT configuration. The third command collects
-the matching Ubuntu source packages into a separate redistribution archive.
-Both archive builders need network access and enough free space.
-
-The application package contains the Python GTK4 files, the public Rime Ice
-snapshot, themes, icon, desktop entry, and README. The offline archive also
-contains a SHA256 manifest and exact binary package inventory. It targets
-Ubuntu 24.04 amd64 only. arm64 and other releases require a separately built
-and tested dependency set.
-
-Each Ubuntu binary .deb ships its corresponding copyright notices. Ubuntu
-source packages are separate from the runtime archive; distribute the sources
-archive alongside it when sharing the bundle. The source collector requires
-the exact source versions still to be present on Ubuntu mirrors. PACKAGES.tsv
-records the binary and source package versions.
+use `./build_offline.sh --reuse-bundle` to refresh the optional runtime bundle.
+An offline bundle downloads the authenticated Ubuntu dependency closure using
+isolated APT state. The companion build_sources.sh collects Ubuntu source
+packages separately for that optional binary redistribution.
