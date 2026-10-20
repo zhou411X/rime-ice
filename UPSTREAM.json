@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/iDvel/rime-ice",
+  "commit": "da1fbe602e38f26db846fa10120ee64c2b0324c0",
+  "archive_sha256": "6e6c0e8c00b969690dbc8b394b0a8f8cb0ed3ad348297ad631de1790c693eebb",
+  "policy": "Public upstream only. Excludes local personal phrases, learned dictionaries, sync state and installation identifiers."
+}

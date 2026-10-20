@@ -1,0 +1,6 @@
+patch:
+  menu/page_size: 9
+  translator/enable_user_dict: true
+  translator/enable_encoder: true
+  translator/encode_commit_history: true
+  melt_eng/enable_user_dict: false

@@ -1,0 +1,20 @@
+# Generated packages, downloaded dependencies, logs and screenshots from tests.
+/dist/
+/upstream/
+/SHA256SUMS
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Never commit local credentials or input-method user state.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.log
+*.userdb/
+*.userdb.*
+installation.yaml
+sync/
+backups/
