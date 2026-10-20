@@ -2,7 +2,7 @@
 
 面向 **Ubuntu 24.04 amd64** 的原生输入法设置中心，基于 Fcitx5、Rime 和公开雾凇拼音，提供完全离线安装包。
 
-这是独立开发的设置工具，并非 Fcitx5、Rime 或雾凇拼音的官方发行版。当前本地开发版本为 **0.2.0 预览版**。
+这是独立开发的设置工具，并非 Fcitx5、Rime 或雾凇拼音的官方发行版。当前版本为 **0.2.0 预览版**。
 
 ![原生 GTK 设置界面](docs/settings-preview.png)
 
@@ -35,7 +35,7 @@
 
 ## 安装
 
-0.2.0 目前在本地构建；下列命令使用本地产物。已发布版本仍在 [Releases](https://github.com/zhou411X/rime-ice-settings/releases)。GitHub 仓库尚未改名。
+前往 [0.2.0 发布页面](https://github.com/zhou411X/rime-ice/releases/tag/v0.2.0) 下载下列安装包。仓库现名为 `zhou411X/rime-ice`。
 
 新版包与主命令为 `rime-ice`。旧命令 `rime-ice-settings` 仍可启动；离线包包含同版本的空过渡包，可从 0.1.0 升级并保留用户配置。
 
@@ -57,7 +57,7 @@ sudo ./install-offline.sh
 sudo apt install ./rime-ice_0.2.0_all.deb
 ```
 
-安装后从应用菜单打开“雾凇输入法设置”，或执行 `rime-ice`。在“常用设置”中启用，按提示在 Fcitx5 配置工具中添加 Rime，然后注销并重新登录。
+安装后从应用菜单打开“雾凇拼音”，或执行 `rime-ice`。在“常用设置”中启用，按提示在 Fcitx5 配置工具中添加 Rime，然后注销并重新登录。
 
 ### 发行文件与校验
 
@@ -67,10 +67,10 @@ sudo apt install ./rime-ice_0.2.0_all.deb
 | `*_all.deb` | 单独应用包 |
 | `*_source.tar.gz` | 构建应用所用的代码、公开数据、主题和打包脚本 |
 | `*_ubuntu24.04_sources.tar.gz` | Ubuntu 依赖的准确版本对应源码，分发时一并提供 |
-| `SHA256SUMS` | 发行附件的 SHA256 校验清单 |
-| `DELIVERY.txt`、`VALIDATION.txt` | 安装说明和验证范围 |
+| `SHA256SUMS-0.2.0` | 发行附件的 SHA256 校验清单 |
+| `DELIVERY-0.2.0.txt`、`VALIDATION-0.2.0.txt` | 安装说明和验证范围 |
 
-在附件所在目录执行 `sha256sum -c SHA256SUMS --ignore-missing`，校验已下载文件。
+在附件所在目录执行 `sha256sum -c SHA256SUMS-0.2.0 --ignore-missing`，校验已下载文件。
 
 ## 范围与限制
 
