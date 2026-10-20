@@ -120,7 +120,7 @@ class SettingsWindow(Adw.ApplicationWindow):
                  ("shortcuts", "快捷键", "input-keyboard-symbolic", self.shortcuts),
                  ("dictionary", "个人词库", "accessories-dictionary-symbolic", self.dictionary),
                  ("backup", "数据与备份", "document-save-symbolic", self.backup),
-                 ("offline", "离线安装", "package-x-generic-symbolic", self.offline)]
+                 ("installation", "安装与依赖", "package-x-generic-symbolic", self.installation)]
         for name, title, icon, factory in pages:
             row = Gtk.ListBoxRow()
             row.page_name = name
@@ -464,7 +464,7 @@ class SettingsWindow(Adw.ApplicationWindow):
         self.row(group, "从备份恢复", "恢复前会再次备份当前配置；恢复后请求重新部署。", button("选择备份", lambda: self.choose_file(False, "选择配置备份", self.confirm_restore)))
         self.row(group, "自动备份目录", "每次修改前保存原文件；可用文件管理器查看。", button("打开目录", lambda: self.open_path(self.store.backups)))
         group = self.group(box, "隐私与分享")
-        self.row(group, "分享安装包不包含个人数据", "离线包仅包含公开词典、通用主题、设置中心及系统依赖。")
+        self.row(group, "分享安装包不包含个人数据", "安装包仅包含公开词典、通用主题和设置中心；系统依赖由 APT 管理。")
         self.row(group, "不需要登录", "本应用没有云端服务，不收集输入内容。")
 
     def export_backup(self, path):
@@ -476,19 +476,23 @@ class SettingsWindow(Adw.ApplicationWindow):
             self.run_work(lambda: (self.store.restore(path), reload_input_method()), "正在恢复配置…", rebuild=True)
         self.confirm("恢复这个备份？", f"{path.name}\n当前配置将先自动备份，未应用的编辑将被放弃。", restore, "备份并恢复")
 
-    def offline(self, box):
-        self.title(box, "离线安装", "拷贝到另一台电脑，没有网络也能安装。")
+    def installation(self, box):
+        self.title(box, "安装与依赖", "安装应用，所需依赖由 Ubuntu 软件源提供。")
         group = self.group(box, "当前版本")
-        self.row(group, "Rime Ice " + __version__, "基于 Fcitx5、Rime 与雾凇拼音；本应用是独立的定制设置中心。")
-        self.row(group, "Ubuntu 24.04 · x86_64", "当前离线包面向 Intel / AMD 64 位电脑；其他架构需单独构建。")
-        group = self.group(box, "使用离线包")
-        self.row(group, "1. 解压完整离线包", "保留 packages、校验清单和安装器在同一目录。")
-        self.row(group, "2. 运行安装器", "终端执行 sudo ./install-offline.sh；只使用随包依赖，不联网。")
-        self.row(group, "3. 打开雾凇输入法设置", "在常用设置中启用输入法，添加 Rime 后注销并重新登录。")
+        self.row(group, "Rime Ice " + __version__, "包含设置中心、雾凇拼音方案、公开词典和 26 套候选框主题。")
+        self.row(group, "Ubuntu 24.04 · x86_64", "目前验证 Intel / AMD 64 位电脑；其他版本和架构尚未验证。")
+        group = self.group(box, "安装应用")
+        self.row(group, "1. 下载应用安装包", "从 GitHub Releases 下载 rime-ice_" + __version__ + "_all.deb。")
+        self.row(group, "2. 使用 APT 安装", "在下载目录执行 sudo apt install ./rime-ice_" + __version__ + "_all.deb；缺少的依赖会从软件源安装。")
+        self.row(group, "3. 启用雾凇拼音", "打开常用设置，启用输入法并在 Fcitx5 中添加 Rime，然后注销并重新登录。")
+        group = self.group(box, "系统依赖")
+        self.row(group, "Fcitx5、Rime、GTK 与字体", "应用包不包含这些系统软件；安装时由 APT 检查并安装缺少的依赖，需要可用的软件源与网络。")
+        self.row(group, "遇到缺少依赖的提示", "若使用 dpkg 安装后依赖未满足，请联网执行 sudo apt --fix-broken install，并检查确认安装计划。")
+        self.row(group, "安装后可离线输入", "拼音输入、公开词典、主题和个人配置均在本机使用，无需云服务。")
         group = self.group(box, "升级与卸载")
-        self.row(group, "离线升级", "运行新版完整包的安装器；个人词库仍保留在用户目录。")
+        self.row(group, "升级应用", "下载新版 .deb 并使用 APT 安装；从旧名称升级时可同时安装发布页提供的过渡包。个人词库保留在用户目录。")
         self.row(group, "卸载设置中心", "使用系统软件管理器移除 rime-ice；不自动删除个人词库。")
-        self.row(group, "开源说明与源代码", "附带 GPL 许可、公开词典来源和项目源代码。", button("查看说明", lambda: self.open_path(Path("/usr/share/doc/rime-ice"))))
+        self.row(group, "开源说明与源代码", "应用源码与安装包一同发布，保留 GPL 和上游许可。", button("查看说明", lambda: self.open_path(Path("/usr/share/doc/rime-ice"))))
 
     def open_path(self, path):
         if not path.exists():

@@ -25,7 +25,7 @@ failure = []
 
 def exercise():
     try:
-        for page in ("general", "appearance", "shortcuts", "dictionary", "backup", "offline"):
+        for page in ("general", "appearance", "shortcuts", "dictionary", "backup", "installation"):
             window.stack.set_visible_child_name(page)
             assert window.stack.get_visible_child_name() == page
         window.stack.set_visible_child_name("appearance")

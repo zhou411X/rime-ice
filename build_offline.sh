@@ -151,23 +151,8 @@ install -m 0644 "$PROJECT_ROOT/packaging/README-offline.txt" "$SCRATCH/bundle/RE
 printf '%s=%s\n%s=%s\n' "$PACKAGE" "$APP_VERSION" "$COMPAT_PACKAGE" "$APP_VERSION" > "$SCRATCH/bundle/INSTALL_PACKAGES"
 python3 "$PROJECT_ROOT/packaging/make_index.py" "$SCRATCH/bundle"
 
-SOURCE_ROOT="$SCRATCH/source/${PACKAGE}-${APP_VERSION}"
-mkdir -p "$SOURCE_ROOT/rime_ice" "$SOURCE_ROOT/data/rime" "$SOURCE_ROOT/data/themes" "$SOURCE_ROOT/packaging" "$SOURCE_ROOT/tests"
-mkdir -p "$SOURCE_ROOT/LICENSES"
-cp "$PROJECT_ROOT"/rime_ice/*.py "$SOURCE_ROOT/rime_ice/"
-cp "$PROJECT_ROOT"/tests/*.py "$PROJECT_ROOT/tests/session.conf" "$SOURCE_ROOT/tests/"
-cp "$PROJECT_ROOT/prepare_data.py" "$PROJECT_ROOT/prepare_themes.py" "$SOURCE_ROOT/"
-python3 "$PROJECT_ROOT/packaging/copy_data.py" "$PROJECT_ROOT/data/rime" "$SOURCE_ROOT/data/rime"
-for theme in "$PROJECT_ROOT"/data/themes/rime-ice-*; do
-  [[ -d "$theme" ]] || continue
-  python3 "$PROJECT_ROOT/packaging/copy_data.py" "$theme" "$SOURCE_ROOT/data/themes/$(basename -- "$theme")"
-done
-cp "$PROJECT_ROOT/data/rime-ice.svg" "$SOURCE_ROOT/data/"
-cp -a "$PROJECT_ROOT/LICENSES/." "$SOURCE_ROOT/LICENSES/"
-cp "$PROJECT_ROOT"/{README.txt,LICENSE,UPSTREAM.json,THEME_UPSTREAM.json,build_deb.sh,build_offline.sh,build_sources.sh,install-offline.sh} "$SOURCE_ROOT/"
-cp "$PROJECT_ROOT"/packaging/{control,control-compat,rime-ice,rime-ice-settings,rime-ice.desktop,README-offline.txt,README.txt,copy_data.py,make_index.py,collect_sources.py} "$SOURCE_ROOT/packaging/"
 mkdir -p "$SCRATCH/bundle/source"
-tar -C "$SCRATCH/source" -czf "$SCRATCH/bundle/source/${PACKAGE}_${APP_VERSION}_source.tar.gz" "${PACKAGE}-${APP_VERSION}"
+"$PROJECT_ROOT/build_source.sh" "$SCRATCH/bundle/source"
 
 (
   cd "$SCRATCH/bundle"
