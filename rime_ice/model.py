@@ -17,12 +17,8 @@ import uuid
 
 import yaml
 
-THEMES = {
-    "rime-ice-jade": ("青玉 · 浅色", "#ffffff", "#28353a", "#387b68", "#e7f1ed"),
-    "rime-ice-night": ("墨夜 · 深色", "#242b32", "#e7eeeb", "#b8d6c9", "#3b5149"),
-    "rime-ice-solarized-light": ("Solarized Light", "#fdf6e3", "#657b83", "#268bd2", "#eee8d5"),
-    "rime-ice-solarized-dark": ("Solarized Dark", "#002b36", "#93a1a1", "#2aa198", "#073642"),
-}
+from .themes import THEMES
+
 SHIFT_ACTIONS = {"commit_code": "提交字母并切换英文", "commit_text": "提交候选并切换英文", "clear": "清空拼音并切换英文", "noop": "不使用左 Shift 切换", "inline_ascii": "临时英文模式"}
 FILTER = "lua_filter@*rime_ice_settings_filter"
 

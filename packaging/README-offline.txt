@@ -1,15 +1,17 @@
-Rime Ice Settings offline bundle for Ubuntu 24.04 amd64
+Rime Ice 0.2.0 offline bundle for Ubuntu 24.04 amd64
 
 Extract the archive on the destination computer, then run:
 
     cd bundle
     sudo ./install-offline.sh
 
-The installer verifies FULL_SHA256SUMS and SHA256SUMS, prints an APT transaction preview, and asks
-for confirmation. Use --yes to accept the preview without an interactive prompt.
+The installer verifies FULL_SHA256SUMS and SHA256SUMS, prints an APT transaction
+preview, and asks for confirmation. Use --yes to accept without a prompt.
 APT uses only the bundle's local file repository and --no-download, so it cannot
-fetch packages from the network. It requests only rime-ice-settings; installed
-newer dependencies may satisfy its requirements. APT rejects package removal
+fetch packages from the network. It requests the exact rime-ice and transitional
+rime-ice-settings versions recorded in INSTALL_PACKAGES. The latter upgrades
+an installed 0.1.0 package without removing it. Installed newer dependencies
+may satisfy requirements. APT rejects package removal
 and downgrades. If the target has an incompatible package set, installation
 stops; it does not alter the APT sources or configuration on the target.
 
@@ -20,7 +22,7 @@ source package names; SHA256SUMS records the payload hashes. Keep these files
 with the packages. Individual Ubuntu packages include their copyright notices
 under /usr/share/doc after installation.
 
-source/rime-ice-settings_0.1.0_source.tar.gz contains the exact application,
+source/rime-ice_0.2.0_source.tar.gz contains the exact application,
 Rime data, and packaging source snapshot. Ubuntu dependency source packages are
 not included in this runtime archive; the builder's build_sources.sh command
 can collect them as a separate archive for redistribution alongside it.

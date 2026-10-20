@@ -36,7 +36,7 @@ with log_path.open("w") as log:
             raise RuntimeError("Fcitx D-Bus startup timed out")
         store.load()
         settings = copy.deepcopy(store.settings)
-        settings.update(page_size=7, theme="rime-ice-solarized-light", vertical=True)
+        settings.update(page_size=7, theme="rime-ice-tiffany", dark_theme="rime-ice-tiffany-night", follow=True, vertical=True)
         entries = [{"text":"测试词条", "code":"csct", "weight":100, "second":True}]
         backup = store.apply(settings, entries)
         print(reload_input_method())
@@ -53,6 +53,9 @@ with log_path.open("w") as log:
         else:
             raise RuntimeError("Rime did not compile changed configuration: " + log_path.read_text()[-4000:])
         print("ENGINE: isolated Fcitx5 start, atomic save, D-Bus reload/deploy, 7 candidates, custom filter compiled: PASS")
+        classic_config = subprocess.check_output(["gdbus", "call", "--session", "--dest", "org.fcitx.Fcitx5", "--object-path", "/controller", "--method", "org.fcitx.Fcitx.Controller1.GetConfig", "fcitx://config/addon/classicui"], text=True)
+        assert "rime-ice-tiffany-night" in classic_config and "rime-ice-tiffany" in classic_config
+        print("ENGINE: Classic UI reports selected Tiffany light/night themes: PASS")
         store.restore(backup)
         print(reload_input_method())
         print("ENGINE: automatic backup restoration: PASS")

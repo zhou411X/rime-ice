@@ -1,4 +1,4 @@
-Rime Ice Settings / 雾凇输入法设置 0.1.0
+Rime Ice / 雾凇输入法设置 0.2.0
 =========================================
 
 面向 Ubuntu 24.04 amd64 的本地设置中心，基于 Fcitx5、Rime 与公开雾凇拼音。
@@ -6,7 +6,7 @@ Rime Ice Settings / 雾凇输入法设置 0.1.0
 
 安装
 ----
-联网安装应用包：sudo apt install ./rime-ice-settings_0.1.0_all.deb
+联网安装应用包：sudo apt install ./rime-ice_0.2.0_all.deb
 完全离线安装：解压完整 offline.tar.gz，进入 bundle，执行 sudo ./install-offline.sh。
 单独的应用 deb 不包含 Ubuntu 系统依赖；无网电脑必须使用完整离线包。
 安装器先展示软件包变更。首次打开“雾凇输入法设置”，在“常用设置”选择启用，
@@ -14,7 +14,7 @@ Rime Ice Settings / 雾凇输入法设置 0.1.0
 
 功能
 ----
-四种候选框主题：青玉、墨夜、Solarized Light、Solarized Dark。
+11 种新配色各有浅色与夜色版，连同青玉、墨夜、Solarized，共 26 套主题。
 系统明暗跟随、字体与字号、横向或纵向排列、3–9 个候选。
 输入法切换快捷键、左 Shift 行为、中文与英文词库学习开关。
 自定义短语增删改查、TXT 导入预览与去重、导出、固定第二候选。
@@ -37,7 +37,7 @@ TXT 仅保存词条、编码、权重。固定第二位规则随个人配置 JSO
 用户词库：$XDG_DATA_HOME/fcitx5/rime（默认 ~/.local/share/fcitx5/rime）
 自动备份：$XDG_STATE_HOME/rime-ice/backups（默认 ~/.local/state/rime-ice/backups）
 公共初始数据：/usr/share/rime-ice/rime
-卸载 rime-ice-settings 不自动删除用户配置和词库。
+卸载 rime-ice 不自动删除用户配置和词库。
 
 源码与验证
 ----------
@@ -57,3 +57,7 @@ TXT 仅保存词条、编码、权重。固定第二位规则随个人配置 JSO
 发行包不包含本机自定义短语、学习数据库、sync 目录或 installation.yaml。
 Fcitx5/Rime/Ubuntu 依赖保持各自许可；随包 deb 保留 /usr/share/doc 下版权说明。
 向他人分发完整离线包时，请同时提供对应源码及上游版权说明。
+
+0.2.0 更名说明：主包与启动命令为 rime-ice；旧命令仍兼容。离线包包含旧包的空过渡包。
+新增主题参考 nevertoday/rime-color-scheme，固定版本见 THEME_UPSTREAM.json。
+配色适配保留 MIT 许可，见 LICENSES/rime-color-scheme.txt；名称不表示品牌合作。

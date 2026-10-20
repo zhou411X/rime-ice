@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Rime Ice
+Name[zh_CN]=雾凇拼音
+Comment=Configure and activate Rime Ice for Fcitx5
+Comment[zh_CN]=配置并启用 Fcitx5 雾凇拼音
+Exec=rime-ice
+Icon=rime-ice
+Terminal=false
+Categories=Settings;Utility;
+Keywords=Rime;Fcitx5;Pinyin;Input Method;

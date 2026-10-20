@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+export PYTHONPATH="/usr/lib/rime-ice${PYTHONPATH:+:$PYTHONPATH}"
+exec /usr/bin/python3 -c 'from rime_ice.app import main; raise SystemExit(main())' "$@"

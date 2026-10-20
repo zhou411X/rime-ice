@@ -1,0 +1,9 @@
+Package: rime-ice-settings
+Version: 0.2.0
+Section: oldlibs
+Priority: optional
+Architecture: all
+Maintainer: Rime Ice local package <root@localhost>
+Depends: rime-ice (= 0.2.0)
+Description: Transitional package for Rime Ice
+ This empty package upgrades the former rime-ice-settings package to rime-ice.

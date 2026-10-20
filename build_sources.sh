@@ -4,8 +4,14 @@ umask 022
 
 PROJECT_ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 DIST_DIR=$(realpath -m -- "${1:-$PROJECT_ROOT/dist}")
-BUNDLE="$DIST_DIR/rime-ice-settings_0.1.0_ubuntu24.04_amd64_offline.tar.gz"
-OUTPUT="$DIST_DIR/rime-ice-settings_0.1.0_ubuntu24.04_sources.tar.gz"
+PACKAGE=$(sed -n 's/^Package: //p' "$PROJECT_ROOT/packaging/control")
+VERSION=$(sed -n 's/^Version: //p' "$PROJECT_ROOT/packaging/control")
+if [[ -z "$PACKAGE" || -z "$VERSION" ]]; then
+  printf 'Missing primary Debian package metadata.\n' >&2
+  exit 1
+fi
+BUNDLE="$DIST_DIR/${PACKAGE}_${VERSION}_ubuntu24.04_amd64_offline.tar.gz"
+OUTPUT="$DIST_DIR/${PACKAGE}_${VERSION}_ubuntu24.04_sources.tar.gz"
 CACHE="$DIST_DIR/source-cache"
 if [[ ! -f "$BUNDLE" ]]; then
   printf 'Build the offline runtime archive first: %s\n' "$BUNDLE" >&2
@@ -32,17 +38,25 @@ trap cleanup EXIT
 mkdir -p "$SCRATCH/lists/partial" "$SCRATCH/archives/partial" "$SCRATCH/ubuntu-sources" \
   "$SCRATCH/apt.conf.d" "$SCRATCH/sources.list.d" "$SCRATCH/preferences.d" "$SCRATCH/log"
 : > "$SCRATCH/status"
-tar -C "$SCRATCH" -xzf "$BUNDLE" bundle/PACKAGES.tsv
+tar -C "$SCRATCH" -xzf "$BUNDLE" bundle/PACKAGES.tsv bundle/INSTALL_PACKAGES
 
-python3 - "$SCRATCH/bundle/PACKAGES.tsv" > "$SCRATCH/specs.txt" <<'PY'
+python3 - "$SCRATCH/bundle/PACKAGES.tsv" "$SCRATCH/bundle/INSTALL_PACKAGES" > "$SCRATCH/specs.txt" <<'PY'
 import csv
 import re
 import sys
 
+first_party = set()
+with open(sys.argv[2], encoding="utf-8") as metadata:
+    for line in metadata:
+        package, separator, version = line.strip().partition("=")
+        if not separator or not package or not version:
+            raise ValueError(f"Invalid INSTALL_PACKAGES entry: {line!r}")
+        first_party.add(package)
+
 specs = set()
 with open(sys.argv[1], newline="", encoding="utf-8") as source:
     for row in csv.DictReader(source, delimiter="\t"):
-        if row["Package"] == "rime-ice-settings":
+        if row["Package"] in first_party:
             continue
         match = re.fullmatch(r"([^ ]+)(?: \(([^)]+)\))?", row["Source"])
         if not match:
