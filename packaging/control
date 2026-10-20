@@ -1,9 +1,11 @@
-Package: rime-ice-settings
-Version: 0.1.0
+Package: rime-ice
+Version: 0.2.0
 Section: utils
 Priority: optional
 Architecture: all
-Maintainer: Rime Ice Settings local package <root@localhost>
+Maintainer: Rime Ice local package <root@localhost>
 Depends: python3, python3-gi, python3-yaml, gir1.2-gtk-4.0, gir1.2-adw-1, fcitx5, fcitx5-rime, fcitx5-config-qt, librime-plugin-lua, fcitx5-frontend-gtk3, fcitx5-frontend-gtk4, fcitx5-frontend-qt5, fcitx5-frontend-qt6, im-config, fonts-noto-cjk, librime-bin, libglib2.0-bin
-Description: Desktop settings for Fcitx5 Rime Ice
+Breaks: rime-ice-settings (<< 0.2.0)
+Replaces: rime-ice-settings (<< 0.2.0)
+Description: Desktop settings and input method data for Rime Ice
  A GTK4 settings application and bundled Rime Ice configuration for Fcitx5.

@@ -13,6 +13,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk, Pango
 
 from . import __version__
+from .themes import DARK_THEMES, THEME_PAIRS
 from .model import (Store, THEMES, SHIFT_ACTIONS, ConfigError, DeploymentError, atomic_write,
                     parse_phrases, phrase_bytes, merge_phrases, validate_phrases,
                     reload_input_method, enable_input_method)
@@ -34,7 +35,10 @@ window { background: @window_bg_color; }
 .ice-theme { padding: 12px; border-radius: 12px; background: transparent; box-shadow: none; }
 .ice-theme:checked { outline: 2px solid #387b68; outline-offset: -2px; }
 switch:checked { background: #387b68; }
-.ice-chip { border-radius: 7px; padding: 9px; margin-bottom: 6px; }
+.ice-chip { border-radius: 7px; padding: 6px; margin-bottom: 4px; }
+.ice-swatch-word { padding: 5px 4px; border-radius: 5px; font-size: 12px; }
+.ice-theme-name { font-size: 12px; font-weight: 600; }
+.ice-theme-hex { font-size: 11px; opacity: .65; }
 .ice-footer { padding: 13px 22px; border-top: 1px solid alpha(@window_fg_color, .1); }
 .ice-status { font-size: 12px; opacity: .7; }
 button.suggested-action { background: #387b68; color: white; }
@@ -77,6 +81,8 @@ class SettingsWindow(Adw.ApplicationWindow):
         self.loading = True
         self.dirty = False
         self.widgets = {}
+        self.choice_keys = {}
+        self.theme_variant = "dark" if self.values["theme"] in DARK_THEMES else "light"
         self.provider = Gtk.CssProvider()
         self.provider.load_from_data(CSS)
         Gtk.StyleContext.add_provider_for_display(self.get_display(), self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
@@ -188,6 +194,7 @@ class SettingsWindow(Adw.ApplicationWindow):
         widget.set_selected(names.index(self.values[key]))
         widget.connect("notify::selected", lambda w, _: self.change(key, names[w.get_selected()]))
         self.widgets[key] = widget
+        self.choice_keys[key] = names
         self.row(group, title, subtitle, widget)
 
     def change(self, key, value):
@@ -211,7 +218,7 @@ class SettingsWindow(Adw.ApplicationWindow):
         self.row(group, "默认不使用云候选", "核心输入、主题、词库和备份均可离线使用。")
 
     def appearance(self, box):
-        self.title(box, "外观与候选框", "舒服的配色，让每一次输入都赏心悦目。")
+        self.title(box, "外观与候选框", "十一种标志色，让熟悉的输入多一点个性。")
         stage = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         stage.add_css_class("ice-preview-stage")
         self.preview_caption = label("候选框预览  /  示例文字", "ice-preview-caption")
@@ -223,7 +230,15 @@ class SettingsWindow(Adw.ApplicationWindow):
         self.candidate.append(self.words)
         stage.append(self.candidate)
         box.append(stage)
-        themes = self.group(box, "主题配色", "使用 Fcitx5 经典界面时生效；桌面扩展接管候选框时由扩展控制外观。")
+        themes = self.group(box, "主题配色", "11 种标志色各有浅色与夜色，另保留 4 套经典主题。选择配色会配对对应夜色。")
+        browser = Gtk.Box(spacing=8, margin_top=8, margin_bottom=8)
+        self.variant_buttons = {}
+        for variant, title in (("light", "浏览浅色"), ("dark", "浏览夜色")):
+            toggle = Gtk.ToggleButton(label=title)
+            toggle.connect("clicked", lambda _, v=variant: self.set_theme_variant(v))
+            browser.append(toggle)
+            self.variant_buttons[variant] = toggle
+        themes.add(browser)
         tiles = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=True, min_children_per_line=2, max_children_per_line=4, column_spacing=8, row_spacing=8)
         themes.add(tiles)
         self.theme_buttons = {}
@@ -231,20 +246,30 @@ class SettingsWindow(Adw.ApplicationWindow):
             toggle = Gtk.ToggleButton()
             toggle.add_css_class("ice-theme")
             toggle.set_active(self.values["theme"] == name)
-            inner = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-            chip = label("1 春风   2 春丰", "ice-chip")
-            provider = Gtk.CssProvider()
-            provider.load_from_data(f"label {{ background: {bg}; color: {fg}; }}".encode())
-            chip.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1)
-            inner.append(chip)
-            inner.append(label(title, "ice-mini"))
+            inner = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            sample = Gtk.Box(spacing=5, homogeneous=True)
+            sample.add_css_class("ice-chip")
+            first = label("1 春风", "ice-swatch-word")
+            second = label("2 春丰", "ice-swatch-word")
+            for widget, css in ((sample, f"box {{background:{bg};}}"), (first, f"label {{background:{hl};color:{active};}}"), (second, f"label {{color:{fg};}}")):
+                provider = Gtk.CssProvider()
+                provider.load_from_data(css.encode())
+                widget.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1)
+            sample.append(first)
+            sample.append(second)
+            inner.append(sample)
+            inner.append(label(title, "ice-theme-name", True))
+            inner.append(label(hl.upper(), "ice-theme-hex"))
+            toggle.set_tooltip_text(f"{title} · 选中色 {hl.upper()}")
             toggle.set_child(inner)
-            toggle.connect("clicked", lambda w, n=name: self.select_theme(n))
+            toggle.connect("clicked", lambda _, n=name: self.select_theme(n))
             tiles.insert(toggle, -1)
             self.theme_buttons[name] = toggle
+        self.set_theme_variant(self.theme_variant)
+        box.append(label("主题用于 Fcitx5 Classic UI；桌面扩展接管候选框时由扩展控制外观。", "ice-mini", True))
         group = self.group(box, "候选框样式")
         self.switch(group, "follow", "跟随系统明暗", "浅色时使用所选主题，深色时使用下方深色主题。")
-        self.dropdown(group, "dark_theme", "深色主题", {k: v[0] for k, v in THEMES.items() if "night" in k or k.endswith("dark")})
+        self.dropdown(group, "dark_theme", "深色主题", {k: v[0] for k, v in THEMES.items() if k in DARK_THEMES})
         self.switch(group, "vertical", "纵向排列", "关闭时横向排列候选。")
         font_button = Gtk.FontButton(font=self.values["font"], use_font=False, use_size=False)
         font_button.connect("font-set", lambda w: self.change("font", w.get_font()))
@@ -256,17 +281,28 @@ class SettingsWindow(Adw.ApplicationWindow):
         self.widgets["page_size"] = count
         self.row(group, "每页候选数", "数字键选择对应候选。", count)
 
+    def set_theme_variant(self, variant):
+        self.theme_variant = variant
+        for key, widget in self.variant_buttons.items():
+            widget.set_active(key == variant)
+        for name, widget in self.theme_buttons.items():
+            widget.get_parent().set_visible((name in DARK_THEMES) == (variant == "dark"))
+
     def select_theme(self, name):
         self.change("theme", name)
+        dark = THEME_PAIRS.get(name, name if name in DARK_THEMES else None)
+        if dark:
+            self.widgets["dark_theme"].set_selected(self.choice_keys["dark_theme"].index(dark))
         for key, widget in self.theme_buttons.items():
             widget.set_active(key == name)
+        self.set_theme_variant("dark" if name in DARK_THEMES else "light")
 
     def update_preview(self):
         if not hasattr(self, "candidate"):
             return
         manager = Adw.StyleManager.get_default()
         theme = self.values["dark_theme"] if self.values["follow"] and manager.get_dark() else self.values["theme"]
-        self.preview_caption.set_text("候选框预览  /  示例文字" if theme in THEMES else "当前使用其他主题；下方以青玉示意，选择主题后可预览")
+        self.preview_caption.set_text(f"{THEMES[theme][0]}  /  选中色 {THEMES[theme][4].upper()}" if theme in THEMES else "当前使用其他主题；下方以青玉示意，选择主题后可预览")
         _, bg, fg, active, hl = THEMES.get(theme, THEMES["rime-ice-jade"])
         description = Pango.FontDescription.from_string(self.values["font"])
         size = description.get_size() / Pango.SCALE or 14
@@ -443,7 +479,7 @@ class SettingsWindow(Adw.ApplicationWindow):
     def offline(self, box):
         self.title(box, "离线安装", "拷贝到另一台电脑，没有网络也能安装。")
         group = self.group(box, "当前版本")
-        self.row(group, "Rime Ice Settings " + __version__, "基于 Fcitx5、Rime 与雾凇拼音；本应用是独立的定制设置中心。")
+        self.row(group, "Rime Ice " + __version__, "基于 Fcitx5、Rime 与雾凇拼音；本应用是独立的定制设置中心。")
         self.row(group, "Ubuntu 24.04 · x86_64", "当前离线包面向 Intel / AMD 64 位电脑；其他架构需单独构建。")
         group = self.group(box, "使用离线包")
         self.row(group, "1. 解压完整离线包", "保留 packages、校验清单和安装器在同一目录。")
@@ -451,8 +487,8 @@ class SettingsWindow(Adw.ApplicationWindow):
         self.row(group, "3. 打开雾凇输入法设置", "在常用设置中启用输入法，添加 Rime 后注销并重新登录。")
         group = self.group(box, "升级与卸载")
         self.row(group, "离线升级", "运行新版完整包的安装器；个人词库仍保留在用户目录。")
-        self.row(group, "卸载设置中心", "使用系统软件管理器移除 rime-ice-settings；不自动删除个人词库。")
-        self.row(group, "开源说明与源代码", "附带 GPL 许可、公开词典来源和项目源代码。", button("查看说明", lambda: self.open_path(Path("/usr/share/doc/rime-ice-settings"))))
+        self.row(group, "卸载设置中心", "使用系统软件管理器移除 rime-ice；不自动删除个人词库。")
+        self.row(group, "开源说明与源代码", "附带 GPL 许可、公开词典来源和项目源代码。", button("查看说明", lambda: self.open_path(Path("/usr/share/doc/rime-ice"))))
 
     def open_path(self, path):
         if not path.exists():
@@ -538,6 +574,7 @@ class SettingsWindow(Adw.ApplicationWindow):
         page = self.stack.get_visible_child_name()
         self.store.load()
         self.values = copy.deepcopy(self.store.settings)
+        self.theme_variant = "dark" if self.values["theme"] in DARK_THEMES else "light"
         self.entries = copy.deepcopy(self.store.phrases)
         self.loading = True
         self.build()

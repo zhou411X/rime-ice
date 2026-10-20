@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/nevertoday/rime-color-scheme",
+  "commit": "f050083a029babb2e0653fef84ef85e3869ba6aa",
+  "file": "schemes/xxd.squirrel.yaml",
+  "sha256": "faaccdfe161f92cc4a903ec6d605cfe01cfeb5dd30c6a7148e0640a548eae12d",
+  "license": "MIT",
+  "license_file": "LICENSES/rime-color-scheme.txt",
+  "adaptation": "11 requested palettes, light/night pairs, BGR converted to RGB for Fcitx5; exact selected fill colors retained. Brand names identify colors only, with no affiliation or endorsement."
+}

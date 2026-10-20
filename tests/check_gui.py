@@ -9,6 +9,8 @@ import time
 from gi.repository import GLib
 from rime_ice.app import Application, SettingsWindow
 from rime_ice.model import Store, DeploymentError
+from rime_ice.themes import BRAND_PALETTES, THEME_PAIRS, THEMES
+from gi.repository import Adw
 
 tmp = tempfile.TemporaryDirectory()
 home = Path(tmp.name)
@@ -61,6 +63,31 @@ def exercise():
             assert window.values == expected
         print("GUI: redeploy success/failure preserve pending edits: PASS")
         print("GUI: 6 pages, theme, layout, candidate count, search, reload, no startup writes: PASS")
+        window.rebuild()
+        window.set_theme_variant("dark")
+        assert not window.dirty, "Browsing night colors must not modify settings"
+        assert sum(w.get_parent().get_visible() for w in window.theme_buttons.values()) == 13
+        Adw.StyleManager.get_default().set_color_scheme(Adw.ColorScheme.FORCE_LIGHT)
+        for slug in BRAND_PALETTES:
+            light = "rime-ice-" + slug
+            dark = THEME_PAIRS[light]
+            window.select_theme(light)
+            assert window.values["theme"] == light
+            assert window.values["dark_theme"] == dark
+            dropdown = window.widgets["dark_theme"]
+            assert window.choice_keys["dark_theme"][dropdown.get_selected()] == dark
+            window.widgets["follow"].set_active(True)
+            window.toggle_mode()
+            assert THEMES[dark][0] in window.preview_caption.get_text()
+            window.toggle_mode()
+            assert THEMES[light][0] in window.preview_caption.get_text()
+            window.select_theme(dark)
+            assert window.theme_variant == "dark"
+            assert window.values["theme"] == dark
+        print("GUI: 11 palette pairs, day/night browser, dropdown pairing and dark previews: PASS")
+        window.select_theme("rime-ice-tiffany")
+        window.widgets["page_size"].set_value(5)
+        window.status.set_text("蒂芙尼蓝 · 浅色与夜色已配对 · 应用设置后生效")
         GLib.timeout_add(400, capture)
     except Exception:
         failure.append(traceback.format_exc())
@@ -86,7 +113,7 @@ def capture():
         node = fn("gtk_snapshot_free_to_node", p, p)(snapshot)
         renderer = fn("gtk_native_get_renderer", p, p)(hash(window))
         texture = fn("gsk_renderer_render_texture", p, p, p, p)(renderer, node, None)
-        output = Path(__file__).resolve().parents[1] / "dist/settings-preview.png"
+        output = Path(__file__).resolve().parents[1] / "dist/settings-preview-0.2.0.png"
         output.parent.mkdir(exist_ok=True)
         result = fn("gdk_texture_save_to_png", ctypes.c_int, p, ctypes.c_char_p)(texture, str(output).encode())
         assert result
